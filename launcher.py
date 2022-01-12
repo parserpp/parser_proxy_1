@@ -13,7 +13,7 @@
 __author__ = 'JHao'
 
 import sys
-from db.dbClient import DbClient
+from dbClient import DbClient
 from logHandler import LogHandler
 from configHandler import ConfigHandler
 

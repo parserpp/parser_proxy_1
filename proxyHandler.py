@@ -14,7 +14,7 @@
 __author__ = 'JHao'
 
 from proxy import Proxy
-from db.dbClient import DbClient
+from dbClient import DbClient
 from configHandler import ConfigHandler
 
 
