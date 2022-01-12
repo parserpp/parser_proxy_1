@@ -13,13 +13,13 @@
 """
 __author__ = 'JHao'
 
-from util.six import Empty
+from six import Empty
 from threading import Thread
 from datetime import datetime
-from handler.logHandler import LogHandler
-from helper.validator import ProxyValidator
-from handler.proxyHandler import ProxyHandler
-from handler.configHandler import ConfigHandler
+from logHandler import LogHandler
+from validator import ProxyValidator
+from proxyHandler import ProxyHandler
+from configHandler import ConfigHandler
 
 
 class DoValidator(object):

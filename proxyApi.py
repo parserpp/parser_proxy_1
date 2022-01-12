@@ -19,10 +19,10 @@ import platform
 from werkzeug.wrappers import Response
 from flask import Flask, jsonify, request
 
-from util.six import iteritems
-from helper.proxy import Proxy
-from handler.proxyHandler import ProxyHandler
-from handler.configHandler import ConfigHandler
+from six import iteritems
+from proxy import Proxy
+from proxyHandler import ProxyHandler
+from configHandler import ConfigHandler
 
 app = Flask(__name__)
 conf = ConfigHandler()

@@ -14,9 +14,9 @@ __author__ = 'JHao'
 
 import os
 import setting
-from util.singleton import Singleton
-from util.lazyProperty import LazyProperty
-from util.six import reload_six, withMetaclass
+from singleton import Singleton
+from lazyProperty import LazyProperty
+from six import reload_six, withMetaclass
 
 
 class ConfigHandler(withMetaclass(Singleton)):

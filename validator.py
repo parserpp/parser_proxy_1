@@ -14,9 +14,9 @@ __author__ = 'JHao'
 
 from re import findall
 from requests import head
-from util.six import withMetaclass
-from util.singleton import Singleton
-from handler.configHandler import ConfigHandler
+from six import withMetaclass
+from singleton import Singleton
+from configHandler import ConfigHandler
 
 conf = ConfigHandler()
 

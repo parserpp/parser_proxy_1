@@ -18,7 +18,7 @@ import requests
 import random
 import time
 
-from handler.logHandler import LogHandler
+from logHandler import LogHandler
 
 requests.packages.urllib3.disable_warnings()
 

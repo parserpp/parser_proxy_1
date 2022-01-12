@@ -14,9 +14,9 @@ __author__ = 'JHao'
 
 import re
 from time import sleep
-from helper.check import DoValidator
 
-from util.webRequest import WebRequest
+from check import DoValidator
+from webRequest import WebRequest
 
 def saveData(text):
     with open("proxyData.txt","a") as f:

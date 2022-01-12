@@ -13,7 +13,7 @@
 __author__ = 'JHao'
 
 import click
-from helper.launcher import startServer, startScheduler
+from launcher import startServer, startScheduler
 from setting import BANNER, VERSION
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])

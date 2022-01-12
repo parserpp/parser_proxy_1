@@ -13,12 +13,12 @@
 __author__ = 'JHao'
 
 from threading import Thread
-from helper.proxy import Proxy
-from helper.check import DoValidator
-from handler.logHandler import LogHandler
-from handler.proxyHandler import ProxyHandler
-from fetcher.proxyFetcher import ProxyFetcher
-from handler.configHandler import ConfigHandler
+from proxy import Proxy
+from check import DoValidator
+from logHandler import LogHandler
+from proxyHandler import ProxyHandler
+from proxyFetcher import ProxyFetcher
+from configHandler import ConfigHandler
 
 
 class _ThreadFetcher(Thread):

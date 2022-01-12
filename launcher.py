@@ -14,21 +14,21 @@ __author__ = 'JHao'
 
 import sys
 from db.dbClient import DbClient
-from handler.logHandler import LogHandler
-from handler.configHandler import ConfigHandler
+from logHandler import LogHandler
+from configHandler import ConfigHandler
 
 log = LogHandler('launcher')
 
 
 def startServer():
     __beforeStart()
-    from api.proxyApi import runFlask
+    from proxyApi import runFlask
     runFlask()
 
 
 def startScheduler():
     __beforeStart()
-    from helper.scheduler import runScheduler
+    from scheduler import runScheduler
     runScheduler()
 
 
