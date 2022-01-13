@@ -12,16 +12,21 @@
 """
 __author__ = 'JHao'
 
+import os
 import re
+import sys
 from time import sleep
 
+import github_api
 from check import DoValidator
 from webRequest import WebRequest
 
+
 def saveData(text):
-    with open("proxyData.txt","a") as f:
+    with open("proxyData.txt", "a") as f:
         f.write(text)
         f.write("\n")
+
 
 class ProxyFetcher(object):
     """
@@ -158,77 +163,115 @@ class ProxyFetcher(object):
         for proxy in proxies:
             yield ':'.join(proxy)
 
-    # @staticmethod
-    # def wallProxy01():
-    #     """
-    #     PzzQz https://pzzqz.com/
-    #     """
-    #     from requests import Session
-    #     from lxml import etree
-    #     session = Session()
-    #     try:
-    #         index_resp = session.get("https://pzzqz.com/", timeout=20, verify=False).text
-    #         x_csrf_token = re.findall('X-CSRFToken": "(.*?)"', index_resp)
-    #         if x_csrf_token:
-    #             data = {"http": "on", "ping": "3000", "country": "cn", "ports": ""}
-    #             proxy_resp = session.post("https://pzzqz.com/", verify=False,
-    #                                       headers={"X-CSRFToken": x_csrf_token[0]}, json=data).json()
-    #             tree = etree.HTML(proxy_resp["proxy_html"])
-    #             for tr in tree.xpath("//tr"):
-    #                 ip = "".join(tr.xpath("./td[1]/text()"))
-    #                 port = "".join(tr.xpath("./td[2]/text()"))
-    #                 yield "%s:%s" % (ip, port)
-    #     except Exception as e:
-    #         print(e)
+    @staticmethod
+    def wallProxy01():
+        """
+        PzzQz https://pzzqz.com/
+        """
+        from requests import Session
+        from lxml import etree
+        session = Session()
+        try:
+            index_resp = session.get("https://pzzqz.com/", timeout=20, verify=False).text
+            x_csrf_token = re.findall('X-CSRFToken": "(.*?)"', index_resp)
+            if x_csrf_token:
+                data = {"http": "on", "ping": "3000", "country": "cn", "ports": ""}
+                proxy_resp = session.post("https://pzzqz.com/", verify=False,
+                                          headers={"X-CSRFToken": x_csrf_token[0]}, json=data).json()
+                tree = etree.HTML(proxy_resp["proxy_html"])
+                for tr in tree.xpath("//tr"):
+                    ip = "".join(tr.xpath("./td[1]/text()"))
+                    port = "".join(tr.xpath("./td[2]/text()"))
+                    yield "%s:%s" % (ip, port)
+        except Exception as e:
+            print(e)
 
-    # @staticmethod
-    # def freeProxy10():
-    #     """
-    #     墙外网站 cn-proxy
-    #     :return:
-    #     """
-    #     urls = ['http://cn-proxy.com/', 'http://cn-proxy.com/archives/218']
-    #     request = WebRequest()
-    #     for url in urls:
-    #         r = request.get(url, timeout=10)
-    #         proxies = re.findall(r'<td>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})</td>[\w\W]<td>(\d+)</td>', r.text)
-    #         for proxy in proxies:
-    #             yield ':'.join(proxy)
+    @staticmethod
+    def freeProxy10():
+        """
+        墙外网站 cn-proxy
+        :return:
+        """
+        urls = ['http://cn-proxy.com/', 'http://cn-proxy.com/archives/218']
+        request = WebRequest()
+        for url in urls:
+            r = request.get(url, timeout=10)
+            proxies = re.findall(r'<td>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})</td>[\w\W]<td>(\d+)</td>', r.text)
+            for proxy in proxies:
+                yield ':'.join(proxy)
 
-    # @staticmethod
-    # def freeProxy11():
-    #     """
-    #     https://proxy-list.org/english/index.php
-    #     :return:
-    #     """
-    #     urls = ['https://proxy-list.org/english/index.php?p=%s' % n for n in range(1, 10)]
-    #     request = WebRequest()
-    #     import base64
-    #     for url in urls:
-    #         r = request.get(url, timeout=10)
-    #         proxies = re.findall(r"Proxy\('(.*?)'\)", r.text)
-    #         for proxy in proxies:
-    #             yield base64.b64decode(proxy).decode()
+    @staticmethod
+    def freeProxy11():
+        """
+        https://proxy-list.org/english/index.php
+        :return:
+        """
+        urls = ['https://proxy-list.org/english/index.php?p=%s' % n for n in range(1, 10)]
+        request = WebRequest()
+        import base64
+        for url in urls:
+            r = request.get(url, timeout=10)
+            proxies = re.findall(r"Proxy\('(.*?)'\)", r.text)
+            for proxy in proxies:
+                yield base64.b64decode(proxy).decode()
 
-    # @staticmethod
-    # def freeProxy12():
-    #     urls = ['https://list.proxylistplus.com/Fresh-HTTP-Proxy-List-1']
-    #     request = WebRequest()
-    #     for url in urls:
-    #         r = request.get(url, timeout=10)
-    #         proxies = re.findall(r'<td>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})</td>[\s\S]*?<td>(\d+)</td>', r.text)
-    #         for proxy in proxies:
-    #             yield ':'.join(proxy)
-
-
-if __name__ == '__main__':
-    p = ProxyFetcher()
-    for i in (p.freeProxy01(),p.freeProxy02(),p.freeProxy03(),p.freeProxy04(),p.freeProxy05(),p.freeProxy06(),p.freeProxy07(),p.freeProxy08(),p.freeProxy09(),p.freeProxy10()):
-        for _ in i:
-            if DoValidator.preValidator(_):
-                saveData(_)
-                print(_)
-
+    @staticmethod
+    def freeProxy12():
+        urls = ['https://list.proxylistplus.com/Fresh-HTTP-Proxy-List-1']
+        request = WebRequest()
+        for url in urls:
+            r = request.get(url, timeout=10)
+            proxies = re.findall(r'<td>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})</td>[\s\S]*?<td>(\d+)</td>', r.text)
+            for proxy in proxies:
+                yield ':'.join(proxy)
 
 
 # http://nntime.com/proxy-list-01.htm
+
+lproxy_list = []
+final_list = []
+
+if __name__ == '__main__':
+    # 0. get token
+    # print(str(len(sys.argv)) + "--->" + str(sys.argv))
+    token = os.getenv('GITHUB_TOKEN', "")
+    if len(sys.argv) > 1:
+        token = sys.argv[1]
+    # 1. get info https://github.com/parserpp/ip_ports/blob/main/proxyinfo.txt
+    con = github_api.get_content("parserpp", "ip_ports", "/proxyinfo.txt", token)
+    # 2. convery info to memory data
+    lproxy_list = con.split("\n")
+    print(len(lproxy_list))
+    # print(type(lproxy_list))
+
+    # 3. request newest data from net
+    p = ProxyFetcher()
+    for proxys in (p.freeProxy01(), p.freeProxy02()
+                   , p.freeProxy03(), p.freeProxy04()
+                   , p.freeProxy05(), p.freeProxy06(),
+                   p.freeProxy07(), p.freeProxy08()
+                   , p.freeProxy09(), p.freeProxy10()
+                   , p.freeProxy11(), p.freeProxy12()
+                   , p.wallProxy01()
+                   ):
+        for oneProxy in proxys:
+            if oneProxy not in lproxy_list:
+                lproxy_list.append(oneProxy)
+                print("found new proxy:" + oneProxy)
+    print("request net address, ips count:" + str(len(lproxy_list)))
+    # 4. ip alive check
+    for proxy_info in lproxy_list:
+        if DoValidator.preValidator(proxy_info):
+            if proxy_info not in final_list:
+                final_list.append(proxy_info)
+    print("ip check over, ips count:" + str(len(final_list)))
+    # 5.update data
+    update_data = ""
+    for _s in lproxy_list:
+        update_data = update_data + _s + "\n"
+    print("will send data to github libs")
+    saveData(update_data)
+    github_api.update_content("parserpp", "ip_ports", "/proxyinfo.txt"
+                              , _token=token
+                              , _content_not_base64=update_data)
+    print("update  github libs over")

@@ -29,9 +29,6 @@ jobs:
 
     - name: Run
       run: |
-        python proxyFetcher.py
+        python proxyFetcher.py ${{ secrets.GTOKEN }}
         echo "run over....."
         ls
-        
-
-
