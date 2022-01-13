@@ -32,3 +32,9 @@ jobs:
         python proxyFetcher.py ${{ secrets.GTOKEN }}
         echo "run over....."
         ls
+
+    - name: lsa
+      run: |
+        type java
+        java -version
+
