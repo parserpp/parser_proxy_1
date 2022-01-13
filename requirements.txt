@@ -6,3 +6,4 @@ gunicorn==19.9.0
 lxml
 redis
 requests
+ pyOpenSSL

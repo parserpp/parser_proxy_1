@@ -4,7 +4,7 @@ import json
 import os
 
 import requests
-
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 """
 https://github.com/NetCapture/PyGithubApi
@@ -16,6 +16,8 @@ _EMAIL = "sanbo.xyz@gmail.com"
 _COMMIT_MSG = "commit by python api[{}].".format(_VERSION)
 isDebug = True
 
+requests.packages.urllib3.disable_warnings()
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # support full path: README.md、/Users/root/Desktop/test.txt, and so on
 # @TODO not support: ~/Desktop/test.txt
@@ -73,7 +75,7 @@ def getSha(_owner, _repo, _path=""
     _path = preparePath(_path, make_prefix="/")
     sha_url = "https://api.github.com/repos/{}/{}/contents{}".format(_owner, _repo, _path)
     _headers = getGithubRequestHeader(__token)
-    resp = requests.request("get", url=sha_url, headers=_headers)
+    resp = requests.request("get", url=sha_url, headers=_headers, verify=False)
     rsult = resp.text
     if isDebug:
         print("getSha url: " + sha_url)
@@ -105,7 +107,7 @@ def create_file(_owner, _repo, _path=""
     #     content_final, _commit_msg, _name, _email)
     _data = "{\"content\":\"" + content_final + "\",\"message\":\"" + _commit_msg + "\" ,\"committer\":{ \"name\":\"" + _name + "\",\"email\":\"" + _email + "\" }}"
     _headers = getGithubRequestHeader(_token)
-    resp = requests.request(method="put", url=create_url, data=_data, headers=_headers)
+    resp = requests.request(method="put", url=create_url, data=_data, headers=_headers, verify=False)
     result = resp.text
     if isDebug:
         print("create_file url:" + create_url)
@@ -142,7 +144,7 @@ def update_content(_owner, _repo, _path=""
     _data = "{\"content\":\"" + content_final + "\",\"message\":\"" + _commit_msg + "\" ,\"sha\":\"" + sha + "\" ,\"committer\":{ \"name\":\"" + _name + "\",\"email\":\"" + _email + "\" }}"
     # _data = "{\"content\":\"" + content_final + "\",\"message\":\"" + _commit_msg + "\", \"sha\":\"" + sha + "\" }"
     _headers = getGithubRequestHeader(_token)
-    resp = requests.request(method="put", url=update_url, data=_data, headers=_headers)
+    resp = requests.request(method="put", url=update_url, data=_data, headers=_headers, verify=False)
     result = resp.text
     if isDebug:
         print("update_content url:" + update_url)
@@ -169,7 +171,7 @@ def delete_file(_owner, _repo, _path=""
     _data = "{\"message\":\"" + _commit_msg + "\" ,\"sha\":\"" + sha + "\" ,\"committer\":{ \"name\":\"" + _name + "\",\"email\":\"" + _email + "\" }}"
     # _data = "{\"message\":\""+_commit_msg+"\", \"sha\":\""+sha+"\" }"
     _headers = getGithubRequestHeader(_token)
-    resp = requests.request(method="delete", url=update_url, data=_data, headers=_headers)
+    resp = requests.request(method="delete", url=update_url, data=_data, headers=_headers, verify=False)
     result = resp.text
     if isDebug:
         print("delete_file url:" + update_url)
@@ -184,7 +186,11 @@ def get_content(_owner, _repo, _path="", _token=os.getenv('GITHUB_TOKEN', "")):
     # check path, the data which not startwith "/", will append "/" add the header
     _path = preparePath(_path, make_prefix="/")
     info = getSha(_owner, _repo, _path, _token)
+    if isDebug:
+        print("get_content sha info:"+info)
     sha_json = json.loads(info)
+    if isDebug:
+        print(sha_json)
     # suport base64
     ct = sha_json['content']
     eds = sha_json['encoding']
@@ -208,7 +214,10 @@ if __name__ == '__main__':
     # get info
     # https://github.com/parserpp/ip_ports/blob/main/proxyinfo.txt
     tss = get_content("parserpp", "ip_ports", "/proxyinfo.txt")
-    # print(tss)
+    print(tss)
+    # sas = getSha("parserpp", "ip_ports", "/proxyinfo.txt")
+    # print(sas)
+
 
 #
 # def testDeleteFileTest():
