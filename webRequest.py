@@ -74,13 +74,13 @@ class WebRequest(object):
                 self.response = requests.get(url, headers=headers, timeout=timeout, *args, **kwargs)
                 return self
             except Exception as e:
-                self.log.error("requests: %s error: %s" % (url, str(e)))
+                #self.log.error("requests: %s error: %s" % (url, str(e)))
                 retry_time -= 1
                 if retry_time <= 0:
                     resp = Response()
                     resp.status_code = 200
                     return self
-                self.log.info("retry %s second after" % retry_interval)
+                #self.log.info("retry %s second after" % retry_interval)
                 time.sleep(retry_interval)
 
     @property
@@ -96,5 +96,5 @@ class WebRequest(object):
         try:
             return self.response.json()
         except Exception as e:
-            self.log.error(str(e))
+            #self.log.error(str(e))
             return {}
