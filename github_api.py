@@ -14,7 +14,7 @@ _VERSION = "v1.0.0"
 _NAME = "sanbo"
 _EMAIL = "sanbo.xyz@gmail.com"
 _COMMIT_MSG = "commit by python api[{}].".format(_VERSION)
-isDebug = True
+isDebug = False
 
 requests.packages.urllib3.disable_warnings()
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
