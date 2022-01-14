@@ -17,17 +17,14 @@ from lxml import etree
 import requests
 import random
 import time
-
-from logHandler import LogHandler
-
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings()
-
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 class WebRequest(object):
     name = "web_request"
 
     def __init__(self, *args, **kwargs):
-        self.log = LogHandler(self.name, file=False)
         self.response = Response()
 
     @property
@@ -101,4 +98,3 @@ class WebRequest(object):
         except Exception as e:
             self.log.error(str(e))
             return {}
-

@@ -17,8 +17,8 @@ import re
 import sys
 from time import sleep
 
+import DoValidator
 import github_api
-from check import DoValidator
 from webRequest import WebRequest
 
 
@@ -231,7 +231,9 @@ class ProxyFetcher(object):
 lproxy_list = []
 final_list = []
 
-if __name__ == '__main__':
+
+def runAllwork():
+    global lproxy_list
     # 0. get token
     # print(str(len(sys.argv)) + "--->" + str(sys.argv))
     token = os.getenv('GITHUB_TOKEN', "")
@@ -243,7 +245,6 @@ if __name__ == '__main__':
     lproxy_list = con.split("\n")
     print(len(lproxy_list))
     # print(type(lproxy_list))
-
     # 3. request newest data from net
     p = ProxyFetcher()
     for proxys in (p.freeProxy01(), p.freeProxy02()
@@ -268,10 +269,35 @@ if __name__ == '__main__':
     # 5.update data
     update_data = ""
     for _s in lproxy_list:
-        update_data = update_data + _s + "\n"
+        if _s != "":
+            update_data = update_data + _s + "\n"
     print("will send data to github libs")
     saveData(update_data)
     github_api.update_content("parserpp", "ip_ports", "/proxyinfo.txt"
                               , _token=token
                               , _content_not_base64=update_data)
     print("update  github libs over")
+
+
+# def testCheck():
+#     p = ProxyFetcher()
+#     for proxys in (p.freeProxy01(), p.freeProxy02()
+#             # , p.freeProxy03(), p.freeProxy04()
+#             # , p.freeProxy05(), p.freeProxy06(),
+#             # p.freeProxy07(), p.freeProxy08()
+#             # , p.freeProxy09(), p.freeProxy10()
+#             # , p.freeProxy11(), p.freeProxy12()
+#             # , p.wallProxy01()
+#                    ):
+#         for oneProxy in proxys:
+#             if oneProxy not in lproxy_list:
+#                 if DoValidator.validator(oneProxy):
+#                     lproxy_list.append(oneProxy)
+#                     print("Can work proxy:" + oneProxy)
+#                 else:
+#                     print("Cann't work proxy:" + oneProxy)
+
+
+if __name__ == '__main__':
+    runAllwork()
+    # testCheck()
