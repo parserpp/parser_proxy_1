@@ -232,25 +232,33 @@ class ProxyFetcher(object):
 lproxy_list = []
 final_list = []
 
+
 HEADER = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0',
           'Accept': '*/*',
           'Connection': 'keep-alive',
           'Accept-Language': 'zh-CN,zh;q=0.8'}
-# 代理验证目标网站
-HTTP_URL = "http://httpbin.org"
 
-HTTPS_URL = "https://www.qq.com"
-
-# 代理验证时超时时间
-VERIFY_TIMEOUT = 10
-
-def httpsValidator(proxy):
-    """https检测超时"""
-    proxies = {"http": "http://{proxy}".format(proxy=proxy), "https": "https://{proxy}".format(proxy=proxy)}
+def check_proxy(proxy):
+    """第二种："""
     try:
-        r = head(HTTPS_URL, headers=HEADER, proxies=proxies, timeout=VERIFY_TIMEOUT, verify=False)
-        return True if r.status_code == 200 else False
-    except Exception as e:
+        # 设置重连次数
+        requests.adapters.DEFAULT_RETRIES = 3
+        # 代理验证时超时时间
+        VERIFY_TIMEOUT = 10
+        # IP = random.choice(IPAgents)
+        _proxies = {"http": "http://{proxy}".format(proxy=proxy), "https": "https://{proxy}".format(proxy=proxy)}
+        # thisIP = "".join(IP.split(":")[0:1])
+        # print(thisIP)
+        res = requests.get(url="http://icanhazip.com/",headers=HEADER, timeout=VERIFY_TIMEOUT, proxies=_proxies, verify=False)
+        proxyIP = res.text
+        if (proxyIP == proxy):
+            print("代理IP:[" + proxy + "]有效！")
+            return True
+        else:
+            print("代理IP["+proxy+"]无效！")
+            return False
+    except:
+        print("EEEE 代理IP["+proxy+"]无效！")
         return False
 
 def runAllwork():
@@ -283,7 +291,7 @@ def runAllwork():
     print("request net address, ips count:" + str(len(lproxy_list)))
     # 4. ip alive check
     for proxy_info in lproxy_list:
-        if httpsValidator(proxy_info):
+        if check_proxy(proxy_info):
             if proxy_info not in final_list:
                 final_list.append(proxy_info)
     print("ip check over, ips count:" + str(len(final_list)))
@@ -300,25 +308,5 @@ def runAllwork():
     print("update  github libs over")
 
 
-# def testCheck():
-#     p = ProxyFetcher()
-#     for proxys in (p.freeProxy01(), p.freeProxy02()
-#             # , p.freeProxy03(), p.freeProxy04()
-#             # , p.freeProxy05(), p.freeProxy06(),
-#             # p.freeProxy07(), p.freeProxy08()
-#             # , p.freeProxy09(), p.freeProxy10()
-#             # , p.freeProxy11(), p.freeProxy12()
-#             # , p.wallProxy01()
-#                    ):
-#         for oneProxy in proxys:
-#             if oneProxy not in lproxy_list:
-#                 if DoValidator.validator(oneProxy):
-#                     lproxy_list.append(oneProxy)
-#                     print("Can work proxy:" + oneProxy)
-#                 else:
-#                     print("Cann't work proxy:" + oneProxy)
-
-
 if __name__ == '__main__':
     runAllwork()
-    # testCheck()
