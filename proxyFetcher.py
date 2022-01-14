@@ -249,8 +249,8 @@ def runAllwork():
     p = ProxyFetcher()
     for proxys in (p.freeProxy01(), p.freeProxy02()
                    , p.freeProxy03(), p.freeProxy04()
-                   , p.freeProxy05(), p.freeProxy06(),
-                   p.freeProxy07(), p.freeProxy08()
+                   , p.freeProxy05(), p.freeProxy06()
+                   , p.freeProxy07(), p.freeProxy08()
                    , p.freeProxy09(), p.freeProxy10()
                    , p.freeProxy11(), p.freeProxy12()
                    , p.wallProxy01()

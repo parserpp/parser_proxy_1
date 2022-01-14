@@ -6,22 +6,13 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: '*/10 * * * *'  #   分 时 日 月 周
-
+    - cron: '*/20 * * * *'  #   分 时 日 月 周
   repository_dispatch:
     types:
       - webhook-1
-      # https://docs.github.com/cn/actions/learn-github-actions/events-that-trigger-workflows
+  # https://docs.github.com/cn/actions/learn-github-actions/events-that-trigger-workflows
   # workflow_dispatch:
-  #   inputs:
-  #     name:
-  #       description: 'Person to greet'
-  #       required: true
-  #       default: 'Mona the Octocat'
-  #     home:
-  #       description: 'location'
-  #       required: false
-  #       default: 'The Octoverse'
+
 
 jobs:
   build:
