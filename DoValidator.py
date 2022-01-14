@@ -75,11 +75,3 @@ def httpValidator(proxy):
         return False
 
 
-def httpsValidator(proxy):
-    """https检测超时"""
-    proxies = {"http": "http://{proxy}".format(proxy=proxy), "https": "https://{proxy}".format(proxy=proxy)}
-    try:
-        r = head(HTTPS_URL, headers=HEADER, proxies=proxies, timeout=VERIFY_TIMEOUT, verify=False)
-        return True if r.status_code == 200 else False
-    except Exception as e:
-        return False
