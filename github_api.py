@@ -6,8 +6,10 @@ import sys
 import requests
 import urllib3
 import requests
-urllib3.disable_warnings()
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+urllib3.disable_warnings()
+requests.packages.urllib3.disable_warnings()
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 # sys.path.append('../')
 # ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -20,9 +22,6 @@ _NAME = "sanbo"
 _EMAIL = "sanbo.xyz@gmail.com"
 _COMMIT_MSG = "commit by python api[{}].".format(_VERSION)
 isDebug = False
-urllib3.disable_warnings()
-requests.packages.urllib3.disable_warnings()
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 # support full path: README.md、/Users/root/Desktop/test.txt, and so on

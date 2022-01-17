@@ -5,8 +5,10 @@ import sys
 import requests
 import urllib3
 import requests
-urllib3.disable_warnings()
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+urllib3.disable_warnings()
+requests.packages.urllib3.disable_warnings()
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 # sys.path.append('../')
 # ssl._create_default_https_context = ssl._create_unverified_context
 
