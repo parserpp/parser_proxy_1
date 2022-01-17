@@ -17,11 +17,11 @@ import re
 import sys
 from time import sleep
 
+import requests
+
 import github_api
 from webRequest import WebRequest
 
-import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 def saveData(text):
     with open("proxyData.txt", "a") as f:
@@ -232,14 +232,13 @@ class ProxyFetcher(object):
 lproxy_list = []
 final_list = []
 
-
 HEADER = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:34.0) Gecko/20100101 Firefox/34.0',
           'Accept': '*/*',
           'Connection': 'keep-alive',
           'Accept-Language': 'zh-CN,zh;q=0.8'}
 
+
 def check_proxy(proxy):
-    """第二种："""
     try:
         # 设置重连次数
         requests.adapters.DEFAULT_RETRIES = 3
@@ -249,17 +248,19 @@ def check_proxy(proxy):
         _proxies = {"http": "http://{proxy}".format(proxy=proxy), "https": "https://{proxy}".format(proxy=proxy)}
         # thisIP = "".join(IP.split(":")[0:1])
         # print(thisIP)
-        res = requests.get(url="http://icanhazip.com/",headers=HEADER, timeout=VERIFY_TIMEOUT, proxies=_proxies, verify=False)
+        res = requests.get(url="http://icanhazip.com/", headers=HEADER, timeout=VERIFY_TIMEOUT, proxies=_proxies,
+                           verify=False)
         proxyIP = res.text
         if (proxyIP == proxy):
             print("代理IP:[" + proxy + "]有效！")
             return True
         else:
-            print("代理IP["+proxy+"]无效！")
+            print("代理IP[" + proxy + "]无效！")
             return False
-    except:
-        print("EEEE 代理IP["+proxy+"]无效！")
+    except Exception as ex:
+        print("出现如下异常%s" % ex)
         return False
+
 
 def runAllwork():
     global lproxy_list
