@@ -6,7 +6,7 @@ on:
     pull_request:
       branches: [ main ]
     schedule:
-      - cron: '* */1.5 * * *'  #   分 时 日 月 周
+      - cron: '* */2 * * *'  #   分 时 日 月 周
     repository_dispatch:
       types:
         - webhook-1
