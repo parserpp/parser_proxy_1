@@ -2,16 +2,14 @@
 import base64
 import json
 import os
-import sys
+
 import requests
 import urllib3
-import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
 urllib3.disable_warnings()
 requests.packages.urllib3.disable_warnings()
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
-# sys.path.append('../')
-# ssl._create_default_https_context = ssl._create_unverified_context
 
 """
 https://github.com/NetCapture/PyGithubApi
@@ -192,7 +190,7 @@ def get_content(_owner, _repo, _path="", _token=os.getenv('GITHUB_TOKEN', "")):
     _path = preparePath(_path, make_prefix="/")
     info = getSha(_owner, _repo, _path, _token)
     if isDebug:
-        print("get_content sha info:"+info)
+        print("get_content sha info:" + info)
     sha_json = json.loads(info)
     if isDebug:
         print(sha_json)
@@ -222,7 +220,6 @@ if __name__ == '__main__':
     print(tss)
     # sas = getSha("parserpp", "ip_ports", "/proxyinfo.txt")
     # print(sas)
-
 
 #
 # def testDeleteFileTest():
