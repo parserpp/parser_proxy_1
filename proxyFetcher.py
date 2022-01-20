@@ -1,16 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
--------------------------------------------------
-   File Name：     proxyFetcher
-   Description :
-   Author :        JHao
-   date：          2016/11/25
--------------------------------------------------
-   Change Activity:
-                   2016/11/25: proxyFetcher
--------------------------------------------------
-"""
-__author__ = 'JHao'
 
 import os
 import re
@@ -386,13 +374,13 @@ def runAllwork():
                 lproxy_list.append(oneProxy)
                 print("found new proxy:" + oneProxy)
     print("request net address, ips count:" + str(len(lproxy_list)))
-    # 4. ip alive check
-    for proxy_info in lproxy_list:
-        # print("will check: "+ str(proxy_info))
-        if check_proxy(proxy_info):
-            if proxy_info not in final_list:
-                final_list.append(proxy_info)
-    print("ip check over, ips count:" + str(len(final_list)))
+    # # 4. ip alive check
+    # for proxy_info in lproxy_list:
+    #     # print("will check: "+ str(proxy_info))
+    #     if check_proxy(proxy_info):
+    #         if proxy_info not in final_list:
+    #             final_list.append(proxy_info)
+    # print("ip check over, ips count:" + str(len(final_list)))
     # 5.update data
     update_data = ""
     for _s in lproxy_list:
