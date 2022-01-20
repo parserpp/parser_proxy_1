@@ -5,7 +5,8 @@ on:
     pull_request:
       branches: [ main ]
     schedule:
-      - cron: '* */2 * * *'  #   分 时 日 月 周
+      # * is a special character in YAML so you have to quote this string
+      - cron:  '*/15 * * * *'
     repository_dispatch:
       types:
         - webhook-1
