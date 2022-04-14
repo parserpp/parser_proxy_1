@@ -1,16 +1,15 @@
 name: PythonCI
 
 on:
-    push:
-      branches: [ main ]
-    pull_request:
-      branches: [ main ]
-    schedule:
-      # * is a special character in YAML so you have to quote this string
-      - cron:  '*/15 * * * *'
-    repository_dispatch:
-      types:
-        - webhook-1
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0/15 * * * *'  #   分 时 日 月 周
+  repository_dispatch:
+    types:
+      - webhook-1
 
   # https://docs.github.com/cn/actions/learn-github-actions/events-that-trigger-workflows
   # workflow_dispatch:
