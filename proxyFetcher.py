@@ -318,8 +318,120 @@ def freeProxy15():
                 yield "%s:%s" % (ip, port)
 
 
+def freeProxy16():
+    """ ProxyScrape - 提供API接口的代理源 """
+    import json
+    urls = [
+        'https://api.proxyscrape.com/v2/',
+        'https://api.proxyscrape.com/v2/?request=get&protocol=http&timeout=5000&country=all&ssl=all&anonymity=all',
+    ]
+    request = WebRequest()
+    for url in urls:
+        try:
+            resp = request.get(url)
+            if resp.text:
+                proxies = resp.text.strip().split('\n')
+                for proxy in proxies:
+                    if ':' in proxy and proxy.strip():
+                        yield proxy.strip()
+        except Exception as e:
+            print(f"ProxyScrape error: {e}")
+
+
+def freeProxy17():
+    """ ProxyNova - 另一个代理列表网站 """
+    urls = [
+        'http://www.proxynova.com/proxy-list.aspx?page=1',
+        'http://www.proxynova.com/proxy-list.aspx?page=2',
+        'http://www.proxynova.com/proxy-list.aspx?page=3',
+    ]
+    request = WebRequest()
+    for url in urls:
+        try:
+            tree = request.get(url).tree
+            if tree:
+                for tr in tree.xpath("//table[@class='cells']//tr")[1:]:
+                    try:
+                        ip = "".join(tr.xpath('./td[1]/text()')).strip()
+                        port = "".join(tr.xpath('./td[2]/text()')).strip()
+                        if ip and port:
+                            yield "%s:%s" % (ip, port)
+                    except:
+                        continue
+        except Exception as e:
+            print(f"ProxyNova error: {e}")
+
+
+def freeProxy18():
+    """ HideMy.name - 匿名代理列表 """
+    urls = [
+        'https://hidemy.name/en/proxy-list/',
+        'https://hidemy.name/en/proxy-list/?type=h',
+        'https://hidemy.name/en/proxy-list/?start=0#list',
+    ]
+    request = WebRequest()
+    for url in urls:
+        try:
+            tree = request.get(url).tree
+            if tree:
+                for tr in tree.xpath("//table[@class='proxy__t']//tr")[1:]:
+                    try:
+                        ip = "".join(tr.xpath('./td[1]/text()')).strip()
+                        port = "".join(tr.xpath('./td[2]/text()')).strip()
+                        if ip and port:
+                            yield "%s:%s" % (ip, port)
+                    except:
+                        continue
+        except Exception as e:
+            print(f"HideMy.name error: {e}")
+
+
+def freeProxy19():
+    """ Spys.me - 长期稳定的代理源 """
+    urls = [
+        'http://spys.me/proxy.txt',
+        'http://spys.me/socks.txt',
+    ]
+    request = WebRequest()
+    for url in urls:
+        try:
+            text = request.get(url).text
+            if text:
+                lines = text.split('\n')
+                for line in lines:
+                    if ':' in line and not line.startswith('#'):
+                        parts = line.split(':')
+                        if len(parts) >= 2:
+                            ip = parts[0].strip()
+                            port = parts[1].strip()
+                            if ip and port and not ip.startswith('#'):
+                                yield "%s:%s" % (ip, port)
+        except Exception as e:
+            print(f"Spys.me error: {e}")
+
+
+def freeProxy20():
+    """ Proxy-list.download - 定期更新的代理列表 """
+    urls = [
+        'https://www.proxy-list.download/api/v1/get?type=http',
+        'https://www.proxy-list.download/api/v1/get?type=socks4',
+        'https://www.proxy-list.download/api/v1/get?type=socks5',
+    ]
+    request = WebRequest()
+    for url in urls:
+        try:
+            text = request.get(url).text
+            if text:
+                proxies = text.strip().split('\n')
+                for proxy in proxies:
+                    if ':' in proxy and proxy.strip():
+                        yield proxy.strip()
+        except Exception as e:
+            print(f"Proxy-list.download error: {e}")
+
+
 # #  TODO 解析规则需要进一步优化
-# def freeProxy16():
+# def freeProxy21():
 #     """ new net time proxy : http://nntime.com/"""
 #     urls = [
 #         'http://nntime.com/proxy-list-%02d.htm' % n for n in range(1, 16)
@@ -367,7 +479,9 @@ def runAllwork():
             , freeProxy09(), freeProxy10()
             , freeProxy11(), freeProxy12()
             , freeProxy13(), freeProxy14()
-            , freeProxy15()
+            , freeProxy15(), freeProxy16()
+            , freeProxy17(), freeProxy18()
+            , freeProxy19(), freeProxy20()
     ):
         for oneProxy in proxys:
             if oneProxy not in lproxy_list:
