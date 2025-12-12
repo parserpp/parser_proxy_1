@@ -46,10 +46,14 @@ jobs:
     - name: Run proxy fetcher
       run: |
         echo "Starting proxy fetcher..."
-        python proxyFetcher.py ${{ secrets.GTOKEN }}
+        # 验证默认启用，确保只提交可用代理
+        # 如需禁用验证，请使用 --no-verify 参数
+        python proxyFetcher.py ${{ secrets.GTOKEN }} --verify
+        # python proxyFetcher.py ${{ secrets.GTOKEN }} --no-verify
         echo "Proxy fetcher completed."
       env:
         GITHUB_TOKEN: ${{ secrets.GTOKEN }}
+        VERIFY_PROXIES: "true"  # 明确启用验证
 
     - name: List files
       run: |

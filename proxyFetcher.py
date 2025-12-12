@@ -533,11 +533,24 @@ def runAllwork():
     import time
     start_time = time.time()
 
-    # 0. get token
+    # 0. get token and arguments
     # print(str(len(sys.argv)) + "--->" + str(sys.argv))
     token = os.getenv('GITHUB_TOKEN', "")
+    verify_proxies = False
+
+    # 解析命令行参数
     if len(sys.argv) > 1:
-        token = sys.argv[1]
+        # 检查是否有 --verify 参数
+        if '--verify' in sys.argv:
+            verify_proxies = True
+            # 从参数中提取token（排除--verify）
+            for arg in sys.argv[1:]:
+                if arg != '--verify' and not arg.startswith('-'):
+                    token = arg
+                    break
+        else:
+            # 兼容旧版本：只有一个参数就是token
+            token = sys.argv[1]
 
     # 1. get info https://github.com/parserpp/ip_ports/blob/main/proxyinfo.txt
     print("Fetching existing proxy list from GitHub...")
@@ -619,13 +632,80 @@ def runAllwork():
     print(f"   - CDN: https://cdn.jsdelivr.net/gh/parserpp/ip_ports/proxyinfo.txt")
     print(f"   - JSON: https://cdn.jsdelivr.net/gh/parserpp/ip_ports/proxyinfo.json")
 
-    # # 4. ip alive check
-    # for proxy_info in lproxy_list:
-    #     # print("will check: "+ str(proxy_info))
-    #     if check_proxy(proxy_info):
-    #         if proxy_info not in final_list:
-    #             final_list.append(proxy_info)
-    # print("ip check over, ips count:" + str(len(final_list)))
+    # 4. 代理有效性验证（默认启用，确保只提交可用代理）
+    #    ⚠️ 重要：为了确保数据质量，强烈建议启用验证
+    #
+    #    验证方法：
+    #    - 'fast': 快速检测（推荐，5秒/代理）
+    #    - 'basic': 基础检测（8秒/代理）
+    #    - 'multiple': 多URL检测（15秒/代理）
+    #    - 'strict': 严格检测（20秒/代理）
+    #
+    #    使用方式：
+    #    - 命令行: python proxyFetcher.py TOKEN --verify
+    #    - 禁用验证: python proxyFetcher.py TOKEN --no-verify
+    #    - 环境变量: export VERIFY_PROXIES=false
+    #    - GitHub Actions: 默认启用，可通过环境变量禁用
+
+    VERIFICATION_METHOD = 'fast'  # 验证方法
+
+    # 默认启用验证，除非明确禁用
+    should_verify = verify_proxies or (
+        '--no-verify' not in sys.argv and
+        os.getenv('VERIFY_PROXIES', '').lower() != 'false'
+    )
+
+    if should_verify:
+        print(f"\n{'='*60}")
+        print(f"开始验证代理有效性 (方法: {VERIFICATION_METHOD})...")
+        print(f"⚠️  注意：验证会需要较长时间，但能确保代理质量")
+        print(f"{'='*60}")
+
+        verified_proxies = []
+        total_count = len(lproxy_list)
+        start_verify_time = time.time()
+
+        for index, proxy_info in enumerate(lproxy_list, 1):
+            if not proxy_info or ':' not in proxy_info:
+                continue
+
+            # 显示进度
+            if index % 100 == 0 or index == 1:
+                elapsed = time.time() - start_verify_time
+                rate = index / elapsed if elapsed > 0 else 0
+                eta = (total_count - index) / rate if rate > 0 else 0
+                print(f"进度: {index}/{total_count} ({index/total_count*100:.1f}%) "
+                      f"- 已验证: {len(verified_proxies)} - "
+                      f"速度: {rate:.1f} 代理/秒 - ETA: {eta/60:.1f} 分钟")
+
+            # 验证代理
+            try:
+                if check_proxy(proxy_info, method=VERIFICATION_METHOD):
+                    verified_proxies.append(proxy_info)
+                    if index <= 10:  # 只显示前10个通过验证的代理
+                        print(f"  ✓ 验证通过: {proxy_info}")
+            except Exception as e:
+                # 验证失败不影响整体流程
+                continue
+
+        verify_duration = time.time() - start_verify_time
+        print(f"\n{'='*60}")
+        print(f"代理验证完成！")
+        print(f"  总代理数: {total_count}")
+        print(f"  验证通过: {len(verified_proxies)} ({len(verified_proxies)/total_count*100:.1f}%)")
+        print(f"  验证失败: {total_count - len(verified_proxies)}")
+        print(f"  验证耗时: {verify_duration/60:.1f} 分钟")
+        print(f"{'='*60}")
+
+        # 使用验证通过的代理列表
+        lproxy_list = verified_proxies
+        print(f"将提交 {len(lproxy_list)} 个已验证的代理到GitHub")
+    else:
+        print(f"\n⚠️  代理验证已禁用，将直接提交 {len(lproxy_list)} 个代理（未验证可用性）")
+        print(f"   如需启用验证，请使用：")
+        print(f"   - 命令行: python proxyFetcher.py TOKEN --verify")
+        print(f"   - 环境变量: export VERIFY_PROXIES=true")
+        print(f"\n   ⚠️  注意：不验证会导致提交无效代理，影响数据质量！")
     # 5.update data
     update_data = ""
     for _s in lproxy_list:
