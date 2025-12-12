@@ -18,7 +18,7 @@ def saveData(text):
 
 
 def generate_json_files(proxy_list):
-    """生成 proxyinfo.json 和 db.json 文件"""
+    """生成 proxyinfo.json 文件（按代理类型分类）"""
     # 生成 proxyinfo.json
     proxies_by_type = {
         "http_high_anonymous": [],
@@ -84,16 +84,8 @@ def generate_json_files(proxy_list):
     with open("proxyinfo.json", "w", encoding='utf-8') as f:
         json.dump(proxies_by_type, f, indent=2, ensure_ascii=False)
 
-    # 生成 db.json (用于 my-json-server)
-    db_data = {"proxies": []}
-    for category, proxies in proxies_by_type.items():
-        db_data["proxies"].extend(proxies)
-
-    with open("db.json", "w", encoding='utf-8') as f:
-        json.dump(db_data, f, indent=2, ensure_ascii=False)
-
-    print(f"Generated proxyinfo.json with {len(proxies_by_type)} categories")
-    print(f"Generated db.json with {len(db_data['proxies'])} proxies")
+    total_proxies = sum(len(proxies) for proxies in proxies_by_type.values())
+    print(f"Generated proxyinfo.json with {len(proxies_by_type)} categories, {total_proxies} total proxies")
 
 
 def freeProxy01():
@@ -621,6 +613,12 @@ def runAllwork():
     print(f"Generating JSON files...")
     generate_json_files(lproxy_list)
 
+    print(f"\n⚠️  注意：my-json-server.typicode.com 已不再支持大量数据")
+    print(f"   推荐使用以下方式访问数据：")
+    print(f"   - GitHub Raw: https://raw.githubusercontent.com/parserpp/ip_ports/main/proxyinfo.txt")
+    print(f"   - CDN: https://cdn.jsdelivr.net/gh/parserpp/ip_ports/proxyinfo.txt")
+    print(f"   - JSON: https://cdn.jsdelivr.net/gh/parserpp/ip_ports/proxyinfo.json")
+
     # # 4. ip alive check
     # for proxy_info in lproxy_list:
     #     # print("will check: "+ str(proxy_info))
@@ -642,7 +640,7 @@ def runAllwork():
                               , _token=token
                               , _content_not_base64=update_data)
 
-    # 更新 proxyinfo.json
+    # 更新 proxyinfo.json (JSON格式，便于程序化处理)
     print("\nUpdating proxyinfo.json...")
     with open("proxyinfo.json", "r", encoding='utf-8') as f:
         json_data = f.read()
@@ -650,27 +648,20 @@ def runAllwork():
                               , _token=token
                               , _content_not_base64=json_data)
 
-    # 更新 db.json
-    print("\nUpdating db.json...")
-    with open("db.json", "r", encoding='utf-8') as f:
-        db_json_data = f.read()
-    result3 = github_api.update_content("parserpp", "ip_ports", "/db.json"
-                              , _token=token
-                              , _content_not_base64=db_json_data)
-
-    if result1 and result2 and result3:
-        print("\n✅ GitHub update complete! All files updated:")
-        print("   - proxyinfo.txt")
-        print("   - proxyinfo.json")
-        print("   - db.json")
+    if result1 and result2:
+        print("\n✅ GitHub update complete! Files updated:")
+        print("   - proxyinfo.txt (原始文本格式)")
+        print("   - proxyinfo.json (JSON格式)")
+        print("\n📡 数据访问方式：")
+        print("   - GitHub Raw: https://raw.githubusercontent.com/parserpp/ip_ports/main/proxyinfo.txt")
+        print("   - CDN: https://cdn.jsdelivr.net/gh/parserpp/ip_ports/proxyinfo.txt")
+        print("   - JSON: https://cdn.jsdelivr.net/gh/parserpp/ip_ports/proxyinfo.json")
     else:
         print("\n⚠️  WARNING: GitHub update incomplete!")
         if not result1:
             print("   - proxyinfo.txt: FAILED")
         if not result2:
             print("   - proxyinfo.json: FAILED")
-        if not result3:
-            print("   - db.json: FAILED")
         print("Data saved locally only.")
 
 
