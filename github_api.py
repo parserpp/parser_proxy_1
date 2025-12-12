@@ -78,12 +78,22 @@ def getSha(_owner, _repo, _path=""
     _path = preparePath(_path, make_prefix="/")
     sha_url = "https://api.github.com/repos/{}/{}/contents{}".format(_owner, _repo, _path)
     _headers = getGithubRequestHeader(__token)
-    resp = requests.request("get", url=sha_url, headers=_headers, verify=False)
-    rsult = resp.text
-    if isDebug:
-        print("getSha url: " + sha_url)
-        print("getSha result: " + rsult)
-    return rsult
+
+    print(f"Fetching from GitHub: {sha_url}")
+    try:
+        resp = requests.request("get", url=sha_url, headers=_headers, verify=False, timeout=10)
+        rsult = resp.text
+        if isDebug:
+            print("getSha url: " + sha_url)
+            print("getSha result: " + rsult)
+        print(f"GitHub response status: {resp.status_code}")
+        return rsult
+    except requests.exceptions.Timeout:
+        print(f"TIMEOUT: GitHub API request took too long: {sha_url}")
+        return ""
+    except requests.exceptions.RequestException as e:
+        print(f"ERROR: GitHub API request failed: {e}")
+        return ""
 
 
 def create_file(_owner, _repo, _path=""
@@ -105,18 +115,25 @@ def create_file(_owner, _repo, _path=""
     _path = preparePath(_path, make_prefix="/")
 
     create_url = "https://api.github.com/repos/{}/{}/contents{}".format(_owner, _repo, _path)
-    # TODO: format error.
-    # data = "{\"content\":\"{}\",\"message\":\"{}\" ,\"committer\":{ \"name\":\"{}\",\"email\":\"{}\" }}".format(
-    #     content_final, _commit_msg, _name, _email)
     _data = "{\"content\":\"" + content_final + "\",\"message\":\"" + _commit_msg + "\" ,\"committer\":{ \"name\":\"" + _name + "\",\"email\":\"" + _email + "\" }}"
     _headers = getGithubRequestHeader(_token)
-    resp = requests.request(method="put", url=create_url, data=_data, headers=_headers, verify=False)
-    result = resp.text
-    if isDebug:
-        print("create_file url:" + create_url)
-        print("create_file data:" + _data)
-        print("create_file resp:" + result)
-    return result
+
+    print(f"Creating GitHub file: {create_url}")
+    try:
+        resp = requests.request(method="put", url=create_url, data=_data, headers=_headers, verify=False, timeout=15)
+        result = resp.text
+        print(f"GitHub create status: {resp.status_code}")
+        if isDebug:
+            print("create_file url:" + create_url)
+            print("create_file data:" + _data)
+            print("create_file resp:" + result)
+        return result
+    except requests.exceptions.Timeout:
+        print(f"TIMEOUT: GitHub create request took too long")
+        return ""
+    except requests.exceptions.RequestException as e:
+        print(f"ERROR: GitHub create request failed: {e}")
+        return ""
 
 
 #  support private/public repo file
@@ -138,23 +155,39 @@ def update_content(_owner, _repo, _path=""
     # check path, the data which not startwith "/", will append "/" add the header
     _path = preparePath(_path, make_prefix="/")
     update_url = "https://api.github.com/repos/{}/{}/contents{}".format(_owner, _repo, _path)
+
+    print(f"Updating GitHub file: {update_url}")
     sha_text = getSha(_owner, _repo, _path, __token=_token)
-    sha_json = json.loads(sha_text)
-    # need support dir's data. @TODO if dir will crash
-    sha = sha_json['sha']
-    # if isDebug:
-    #     print("sha：" + sha)
+    if not sha_text:
+        print("ERROR: Failed to get SHA from GitHub, aborting update")
+        return ""
+
+    try:
+        sha_json = json.loads(sha_text)
+        sha = sha_json['sha']
+    except (json.JSONDecodeError, KeyError) as e:
+        print(f"ERROR: Failed to parse SHA response: {e}")
+        return ""
+
     _data = "{\"content\":\"" + content_final + "\",\"message\":\"" + _commit_msg + "\" ,\"sha\":\"" + sha + "\" ,\"committer\":{ \"name\":\"" + _name + "\",\"email\":\"" + _email + "\" }}"
-    # _data = "{\"content\":\"" + content_final + "\",\"message\":\"" + _commit_msg + "\", \"sha\":\"" + sha + "\" }"
     _headers = getGithubRequestHeader(_token)
-    resp = requests.request(method="put", url=update_url, data=_data, headers=_headers, verify=False)
-    result = resp.text
-    if isDebug:
-        print("update_content url:" + update_url)
-        print(_headers)
-        print("update_content data:" + _data)
-        print("update_content resp:" + result)
-    return result
+
+    try:
+        resp = requests.request(method="put", url=update_url, data=_data, headers=_headers, verify=False, timeout=15)
+        result = resp.text
+        print(f"GitHub update status: {resp.status_code}")
+        if isDebug:
+            print("update_content url:" + update_url)
+            print(_headers)
+            print("update_content data:" + _data)
+            print("update_content resp:" + result)
+        return result
+    except requests.exceptions.Timeout:
+        print(f"TIMEOUT: GitHub update request took too long")
+        return ""
+    except requests.exceptions.RequestException as e:
+        print(f"ERROR: GitHub update request failed: {e}")
+        return ""
 
 
 def delete_file(_owner, _repo, _path=""
@@ -166,41 +199,73 @@ def delete_file(_owner, _repo, _path=""
     # check path, the data which not startwith "/", will append "/" add the header
     _path = preparePath(_path, make_prefix="/")
     update_url = "https://api.github.com/repos/{}/{}/contents{}".format(_owner, _repo, _path)
+
+    print(f"Deleting GitHub file: {update_url}")
     sha_text = getSha(_owner, _repo, _path, __token=_token)
-    sha_json = json.loads(sha_text)
-    # need support dir's data. @TODO if dir will crash
-    sha = sha_json['sha']
+    if not sha_text:
+        print("ERROR: Failed to get SHA from GitHub, aborting delete")
+        return ""
+
+    try:
+        sha_json = json.loads(sha_text)
+        sha = sha_json['sha']
+    except (json.JSONDecodeError, KeyError) as e:
+        print(f"ERROR: Failed to parse SHA response: {e}")
+        return ""
 
     _data = "{\"message\":\"" + _commit_msg + "\" ,\"sha\":\"" + sha + "\" ,\"committer\":{ \"name\":\"" + _name + "\",\"email\":\"" + _email + "\" }}"
-    # _data = "{\"message\":\""+_commit_msg+"\", \"sha\":\""+sha+"\" }"
     _headers = getGithubRequestHeader(_token)
-    resp = requests.request(method="delete", url=update_url, data=_data, headers=_headers, verify=False)
-    result = resp.text
-    if isDebug:
-        print("delete_file url:" + update_url)
-        print(_headers)
-        print("delete_file data:" + _data)
-        print("delete_file resp:" + result)
 
-    return result
+    try:
+        resp = requests.request(method="delete", url=update_url, data=_data, headers=_headers, verify=False, timeout=15)
+        result = resp.text
+        print(f"GitHub delete status: {resp.status_code}")
+        if isDebug:
+            print("delete_file url:" + update_url)
+            print(_headers)
+            print("delete_file data:" + _data)
+            print("delete_file resp:" + result)
+        return result
+    except requests.exceptions.Timeout:
+        print(f"TIMEOUT: GitHub delete request took too long")
+        return ""
+    except requests.exceptions.RequestException as e:
+        print(f"ERROR: GitHub delete request failed: {e}")
+        return ""
 
 
 def get_content(_owner, _repo, _path="", _token=os.getenv('GITHUB_TOKEN', "")):
     # check path, the data which not startwith "/", will append "/" add the header
     _path = preparePath(_path, make_prefix="/")
     info = getSha(_owner, _repo, _path, _token)
+
+    if not info:
+        print("ERROR: Failed to get content from GitHub (getSha returned empty)")
+        return ""
+
     if isDebug:
         print("get_content sha info:" + info)
-    sha_json = json.loads(info)
+
+    try:
+        sha_json = json.loads(info)
+    except json.JSONDecodeError as e:
+        print(f"ERROR: Failed to parse GitHub response as JSON: {e}")
+        return ""
+
     if isDebug:
         print(sha_json)
+
     # suport base64
-    ct = sha_json['content']
-    eds = sha_json['encoding']
-    if "base64" == eds:
-        res = str(base64.b64decode(ct.encode("utf-8")), "utf-8")
-        return res
-    return ct
+    try:
+        ct = sha_json['content']
+        eds = sha_json['encoding']
+        if "base64" == eds:
+            res = str(base64.b64decode(ct.encode("utf-8")), "utf-8")
+            return res
+        return ct
+    except KeyError as e:
+        print(f"ERROR: Missing key in GitHub response: {e}")
+        return ""
 
 
 if __name__ == '__main__':

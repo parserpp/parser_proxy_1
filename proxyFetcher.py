@@ -458,36 +458,82 @@ final_list = []
 
 def runAllwork():
     global lproxy_list
+    import time
+    start_time = time.time()
+
     # 0. get token
     # print(str(len(sys.argv)) + "--->" + str(sys.argv))
     token = os.getenv('GITHUB_TOKEN', "")
     if len(sys.argv) > 1:
         token = sys.argv[1]
+
     # 1. get info https://github.com/parserpp/ip_ports/blob/main/proxyinfo.txt
+    print("Fetching existing proxy list from GitHub...")
     con = github_api.get_content("parserpp", "ip_ports", "/proxyinfo.txt", token)
-    # 2. convery info to memory data
-    lproxy_list = con.split("\n")
-    print(len(lproxy_list))
+
+    if not con:
+        print("WARNING: Failed to fetch from GitHub, starting with empty proxy list")
+        lproxy_list = []
+    else:
+        # 2. convery info to memory data
+        lproxy_list = con.split("\n")
+
+    print(f"Loaded {len(lproxy_list)} existing proxies")
     # print(type(lproxy_list))
     # 3. request newest data from net
 
-    for proxys in (
-            freeProxy01(), freeProxy02()
-            , freeProxy03(), freeProxy04()
-            , freeProxy05(), freeProxy06()
-            , freeProxy07(), freeProxy08()
-            , freeProxy09(), freeProxy10()
-            , freeProxy11(), freeProxy12()
-            , freeProxy13(), freeProxy14()
-            , freeProxy15(), freeProxy16()
-            , freeProxy17(), freeProxy18()
-            , freeProxy19(), freeProxy20()
-    ):
-        for oneProxy in proxys:
-            if oneProxy not in lproxy_list:
-                lproxy_list.append(oneProxy)
-                print("found new proxy:" + oneProxy)
-    print("request net address, ips count:" + str(len(lproxy_list)))
+    proxy_functions = [
+        ("freeProxy01", freeProxy01),
+        ("freeProxy02", freeProxy02),
+        ("freeProxy03", freeProxy03),
+        ("freeProxy04", freeProxy04),
+        ("freeProxy05", freeProxy05),
+        ("freeProxy06", freeProxy06),
+        ("freeProxy07", freeProxy07),
+        ("freeProxy08", freeProxy08),
+        ("freeProxy09", freeProxy09),
+        ("freeProxy10", freeProxy10),
+        ("freeProxy11", freeProxy11),
+        ("freeProxy12", freeProxy12),
+        ("freeProxy13", freeProxy13),
+        ("freeProxy14", freeProxy14),
+        ("freeProxy15", freeProxy15),
+        ("freeProxy16", freeProxy16),
+        ("freeProxy17", freeProxy17),
+        ("freeProxy18", freeProxy18),
+        ("freeProxy19", freeProxy19),
+        ("freeProxy20", freeProxy20),
+    ]
+
+    total_new_proxies = 0
+    for func_name, proxys_func in proxy_functions:
+        try:
+            print(f"\n{'='*60}")
+            print(f"Fetching from {func_name}...")
+            func_start = time.time()
+            proxys = proxys_func()
+            proxy_count = 0
+            for oneProxy in proxys:
+                if oneProxy not in lproxy_list:
+                    lproxy_list.append(oneProxy)
+                    print(f"[NEW] {oneProxy}")
+                    proxy_count += 1
+                    total_new_proxies += 1
+
+            func_duration = time.time() - func_start
+            print(f"Completed {func_name}: {proxy_count} new proxies in {func_duration:.2f}s")
+            print(f"Total runtime so far: {time.time() - start_time:.2f}s")
+            print(f"Total new proxies found: {total_new_proxies}")
+
+        except Exception as e:
+            print(f"ERROR in {func_name}: {str(e)}")
+            continue
+
+    print(f"\n{'='*60}")
+    print(f"Fetching completed! Total new proxies: {total_new_proxies}")
+    print(f"Total proxy count: {len(lproxy_list)}")
+    print(f"Total execution time: {time.time() - start_time:.2f}s")
+
     # # 4. ip alive check
     # for proxy_info in lproxy_list:
     #     # print("will check: "+ str(proxy_info))
@@ -500,12 +546,17 @@ def runAllwork():
     for _s in lproxy_list:
         if _s != "":
             update_data = update_data + _s + "\n"
-    print("will send data to github libs")
+    print("\nSending data to GitHub...")
     saveData(update_data)
-    github_api.update_content("parserpp", "ip_ports", "/proxyinfo.txt"
+
+    result = github_api.update_content("parserpp", "ip_ports", "/proxyinfo.txt"
                               , _token=token
                               , _content_not_base64=update_data)
-    print("update  github libs over")
+
+    if result:
+        print("GitHub update complete!")
+    else:
+        print("WARNING: GitHub update failed! Data saved locally only.")
 
 
 if __name__ == '__main__':

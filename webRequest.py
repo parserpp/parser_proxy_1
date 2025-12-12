@@ -42,7 +42,7 @@ class WebRequest(object):
                    'Accept-Language': 'zh-CN,zh;q=0.8'}
         return _header
 
-    def get(self, url, header=None, retry_time=3, retry_interval=5, timeout=10, *args, **kwargs):
+    def get(self, url, header=None, retry_time=3, retry_interval=2, timeout=5, *args, **kwargs):
         """
         get method
         :param url: target url
@@ -55,8 +55,10 @@ class WebRequest(object):
         headers = self.req_header()
         if header and isinstance(header, dict):
             headers.update(header)
-        while True:
+
+        for attempt in range(retry_time):
             try:
+                print(f"Fetching: {url} (attempt {attempt + 1}/{retry_time})")
                 self.response = requests.get(
                     url
                     , headers=headers
@@ -65,16 +67,18 @@ class WebRequest(object):
                     , *args
                     , **kwargs
                 )
+                print(f"Success: {url} - Status: {self.response.status_code}")
                 return self
             except Exception as e:
-                # self.log.error("requests: %s error: %s" % (url, str(e)))
-                retry_time -= 1
-                if retry_time <= 0:
+                print(f"Failed: {url} - Error: {str(e)} - Attempt {attempt + 1}/{retry_time}")
+                if attempt < retry_time - 1:
+                    time.sleep(retry_interval)
+                else:
+                    # Final attempt failed, return empty response
                     resp = Response()
                     resp.status_code = 200
+                    self.response = resp
                     return self
-                # self.log.info("retry %s second after" % retry_interval)
-                time.sleep(retry_interval)
 
     @property
     def tree(self):
